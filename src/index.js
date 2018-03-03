@@ -38,16 +38,44 @@ function solveSudoku1(matrix) {
         if(matrix[i][j]){
           let value = matrix[i][j];
           for(let k = i; k < length; k++){
+            if(field[k][j][value - 1]){
+            debugField.push({
+              i:i,
+              j:j,
+              value:value - 1
+            });
+          }
             field[k][j][value - 1] = false;
           }
           for(let k = j; k < length; k++){
+            if(field[i][k][value - 1] ){
+              debugField.push({
+                i:i,
+                j:j,
+                value:value - 1
+              });
+            }
             field[i][k][value - 1]  = false;
           }
           for(let k = i; k >= 0; k--){
+            if(field[k][j][value - 1]){
+              debugField.push({
+                i:i,
+                j:j,
+                value:value - 1
+              });
+            }
             field[k][j][value - 1] = false;
           }
 
           for(let k = j; k >= 0; k--){
+            if(field[i][k][value - 1]){
+              debugField.push({
+                i:i,
+                j:j,
+                value:value - 1
+              });
+            }
             field[i][k][value - 1]  = false;
           }
 
@@ -56,7 +84,8 @@ function solveSudoku1(matrix) {
       }
     }
   }
-  var debug;
+  var debug = [];
+  var debugField = [];
   
 
 
@@ -128,6 +157,13 @@ function solveSudoku1(matrix) {
       for(let i = Math.floor(cof / 3) * 3; i < (Math.floor(cof / 3) + 1) * 3;i++){
         for(let j = (cof % 3 * 3) ; j < 3 * (cof % 3 + 1); j++){
           for(let k = 0; k < presentValue.length; k++){
+            if(field[i][j][presentValue[k] - 1]){
+              debugField.push({
+                i:i,
+                j:j,
+                value:presentValue[k] - 1
+              });
+            }
             field[i][j][presentValue[k] - 1] = false;
           }
         }      
@@ -166,6 +202,13 @@ function solveSudoku1(matrix) {
             if(field[i][j][k] === true){
               for(let h = 0; h < length; h++){
                 if(h !== k){
+                  if(field[i][j][h] ){
+                    debugField.push({
+                      i:i,
+                      j:j,
+                      value:h
+                    });
+                  }
                   field[i][j][h] = false;
                 }
               }
@@ -201,6 +244,13 @@ function solveSudoku1(matrix) {
           if(field[j][i][k] === true){
             for(let h = 0; h < length; h++){
               if(h !== k){
+                if(field[j][i][h] ){
+                  debugField.push({
+                    i:i,
+                    j:j,
+                    value:h
+                  });
+                }
                 field[j][i][h] = false;
               }
             }
@@ -241,6 +291,13 @@ function solveSudoku1(matrix) {
               if(field[i][j][k]){
                 for(let h = 0; h < length; h++){
                   if(h !== k){
+                    if(field[i][j][h] ){
+                      debugField.push({
+                        i:i,
+                        j:j,
+                        value:h
+                      });
+                    }
                     field[i][j][h] = false;
                   }
                 }
@@ -338,6 +395,13 @@ function solveSudoku1(matrix) {
               }
              
               if(condition){
+                if(field[square[i][j]['indices'][0].i][k][i] ){
+                  debugField.push({
+                    i:i,
+                    j:j,
+                    value:i
+                  });
+                }
                 field[square[i][j]['indices'][0].i][k][i] = false;
                 debX.push({
                   i:square[i][j]['indices'][0].i,
@@ -354,6 +418,13 @@ function solveSudoku1(matrix) {
                 }
                
                 if(condition){
+                  if(field[k][square[i][j]['indices'][0].j][i] ){
+                    debugField.push({
+                      i:i,
+                      j:j,
+                      value:i
+                    });
+                  }
                    field[k][square[i][j]['indices'][0].j][i] = false;
                   debY.push({
                     i:k,
@@ -365,37 +436,108 @@ function solveSudoku1(matrix) {
         }
       }
       }
-      // console.dir('debX');
-      // console.dir(debX);
-      // console.dir('debY');
-      // console.dir(debY);
       return square;
     }
   
+
+
+    function simpleAlg(matrix,field) {
+      let stack = [];
+
+      function checkRow(matrix,rowNumber,value) {
+        let count = 0;
+        for(let i = 0; i < length; i++){
+          if(matrix[rowNumber][i] == value + 1){
+            count++;
+          }
+        }
+        if(count > 1) return true;
+        else return false;
+      }
+
+      function checkColumn(matrix,columnNumber,value) {
+        let count = 0;
+        for(let i = 0; i < length; i++){
+          if(matrix[i][columnNumber] == value + 1){
+            count++;
+          }
+        }
+        if(count > 1) return true;
+        else return false;
+      }
+
+
+      function checkSquare(matrix,squareNumber,value) {
+        let count = 0;
+        for(let i = Math.floor(squareNumber / 3) * 3; i < (Math.floor(squareNumber / 3) + 1) * 3; i++){
+          for(let j = (squareNumber % 3 * 3) ; j < 3 * (squareNumber % 3 + 1); j++){
+              if(matrix[i][j] == value + 1){
+                count++;
+            }
+          }      
+        }
+
+        if(count > 1) return true;
+        else return false;
+      }
+      let count = 0;
+      for (let i = 0; i < length; i++) {
+        for(let j = 0; j < length; j++){
+
+          for(let k = 0; k < length; k++){
+            if(field[i][j][k] && matrix[i][j] == 0){
+              stack.push({
+                i:i,
+                j:j,
+                value:k
+              });
+              matrix[i][j] = k +1;
+              // field[i][j][k]= false;
+              count++;
+              if(count > 1000) return;
+            } 
+            if(checkRow(matrix,i,k) || checkColumn(matrix,j,k) || checkSquare(matrix,Math.floor(i /3 ) + Math.floor(j /3 ),k)
+           || (matrix[i][j] == 0 && k == 8)){
+              let last = stack.pop();
+              if(last == undefined){
+                   return;
+              }
+              i = last.i;
+              j = last.j;
+              k = last.value;
+              matrix[i][j] = 0;
+            } 
+          
+        }
+        
+         
+
+      
+    }
+      }
+    }
 
   let field = createField(matrix);
 
   let count = 0;
 
-  do{
-    lastHero(matrix,field);
-    // drawField(matrix,field,'lastHero'+count);
-    checkSquare(matrix,field);
-    // drawField(matrix,field,'checkSquare'+count);
-    hiddenCouples(field);
-    // drawField(matrix,field,'hiddenCouples'+count);
-  
-    // console.dir(lockedCandidate(field));
-    lockedCandidate(field)
-    // drawField(matrix,field,'lockedCandidate'+count);
 
+
+  do{
+    debugField = [];
+    lastHero(matrix,field);
+    checkSquare(matrix,field);
+    hiddenCouples(field);
+    lockedCandidate(field)
     insertAnswerValue(matrix,field);
-    // drawField(matrix,field,'insertAnswerValue '+count);
+    if(!debug.length){
+      simpleAlg(matrix,field);
+      break;
+    }
     count++;
-  }while(checkForEnd(field) && !!debug.length && count < 30);
+  }while(checkForEnd(field) && (!!debug.length || !!debugField.length) && count < 30);
 
   
   return matrix;
-
 
 }
