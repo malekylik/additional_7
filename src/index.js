@@ -1,16 +1,4 @@
 module.exports = function solveSudoku(matrix) {
-
-  return solveSudoku1(matrix);
-
- 
-}
-
-
-function solveSudoku1(matrix) {
-  // your solution
-
-
- 
   const length = matrix.length;
 
   function createField(matrix){
@@ -101,11 +89,8 @@ function solveSudoku1(matrix) {
             if(field[i][j][k]){
               countOfOptions++;
               value = k + 1;
-              // console.dir("k : " + k);
-              // console.dir("value : " +value);
             }
           }
-          // console.dir(value);
           if(countOfOptions == 1){
 
             if(value === 0){ 
@@ -124,8 +109,6 @@ function solveSudoku1(matrix) {
         }
       }
     }
-    // console.dir("!length : " + debug.length);
-    
   }
 
   function checkForEnd(field){
@@ -480,48 +463,68 @@ function solveSudoku1(matrix) {
         if(count > 1) return true;
         else return false;
       }
-      let count = 0;
-      for (let i = 0; i < length; i++) {
-        for(let j = 0; j < length; j++){
 
-          for(let k = 0; k < length; k++){
+
+      let count = 0;
+    
+      let i = j = k = 0;
+
+      while(i < length){
+        while(j < length){
+          while(k < field[i][j].length){
+
+
             if(field[i][j][k] && matrix[i][j] == 0){
               stack.push({
                 i:i,
                 j:j,
                 value:k
               });
-              matrix[i][j] = k +1;
-              // field[i][j][k]= false;
-              count++;
-              if(count > 1000) return;
-            } 
-            if(checkRow(matrix,i,k) || checkColumn(matrix,j,k) || checkSquare(matrix,Math.floor(i /3 ) + Math.floor(j /3 ),k)
-           || (matrix[i][j] == 0 && k == 8)){
-              let last = stack.pop();
-              if(last == undefined){
-                   return;
+              matrix[i][j] = k + 1;
+
+              if(checkRow(matrix,i,k) || checkColumn(matrix,j,k) || checkSquare(matrix,Math.floor(i /3 ) + Math.floor(j /3 ),k)){
+                let last = stack.pop();
+                while(last.value == 8){
+                  matrix[last.i][last.j] = 0;
+                  last = stack.pop();
+                }
+
+                matrix[last.i][last.j] = 0;
+                i = last.i;
+                j = last.j;
+                k = last.value + 1;
+                continue;
               }
+
+            }
+
+
+            k++;
+          }
+          j++;
+          
+          if(k > 8){
+            k = 0;
+            if(matrix[i][j - 1] == 0){
+              let last = stack.pop();
+              matrix[last.i][last.j] = 0;
               i = last.i;
               j = last.j;
-              k = last.value;
-              matrix[i][j] = 0;
-            } 
-          
-        }
-        
-         
+              k = last.value + 1;
+              continue;
+            }
+          }
 
-      
-    }
+        }
+        i++;
+
+        if(j > 8){
+          j = 0;
+        }
       }
     }
 
   let field = createField(matrix);
-
-  let count = 0;
-
-
 
   do{
     debugField = [];
@@ -534,8 +537,7 @@ function solveSudoku1(matrix) {
       simpleAlg(matrix,field);
       break;
     }
-    count++;
-  }while(checkForEnd(field) && (!!debug.length || !!debugField.length) && count < 30);
+  }while(checkForEnd(field) && (!!debug.length || !!debugField.length));
 
   
   return matrix;
